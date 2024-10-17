@@ -1,0 +1,13 @@
+package com.yildizholding.ocean.passthroughserviceautomator;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PassthroughServiceAutomatorApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PassthroughServiceAutomatorApplication.class, args);
+    }
+
+}
