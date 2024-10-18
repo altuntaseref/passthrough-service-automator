@@ -8,8 +8,15 @@ public class ProjectDirector {
 
     public void constructProject(ProjectBuilder builder, ProjectRequest projectRequest){
         builder.createBaseProject(projectRequest);
+        builder.createPackages(projectRequest);
         builder.updatePomXml(projectRequest);
-        builder.addCommonClasses(projectRequest);
+        builder.createInboundRequestLoggingFilterConfig(projectRequest);
+        builder.createServiceConfig(projectRequest);
+        builder.createApplicationProperties(projectRequest);
+        builder.createBootStrap(projectRequest);
+        builder.createSettingsXml(projectRequest);
+        builder.createSwaggerConfig(projectRequest);
+        builder.createLogbackXml(projectRequest);
         builder.addConfigClasses(projectRequest);
         builder.generateModelClasses(projectRequest);
         builder.generateController(projectRequest);

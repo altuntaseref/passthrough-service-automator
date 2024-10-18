@@ -6,9 +6,16 @@ import java.io.IOException;
 
 public interface ProjectBuilder {
 
-    void createBaseProject(ProjectRequest request) ;
+    void createBaseProject(ProjectRequest request);
+    void createPackages(ProjectRequest request);
     void updatePomXml(ProjectRequest request);
-    void addCommonClasses(ProjectRequest request);
+    void createInboundRequestLoggingFilterConfig(ProjectRequest request);
+    void createServiceConfig(ProjectRequest request);
+    void createApplicationProperties(ProjectRequest request);
+    void createBootStrap(ProjectRequest request);
+    void createLogbackXml(ProjectRequest request);
+    void createSettingsXml(ProjectRequest request);
+    void createSwaggerConfig(ProjectRequest request);
     void addConfigClasses(ProjectRequest request);
     void generateModelClasses(ProjectRequest request);
     void generateController(ProjectRequest request);

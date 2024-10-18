@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirror>
+        <id>maven-default-http-blocker</id>
+        <mirrorOf>external:http:*</mirrorOf>
+        <name>Pseudo repository to mirror external repositories initially using HTTP.</name>
+        <url>http://0.0.0.0/</url>
+    </mirror>
+    <servers>
+        <server>
+            <id>yildiz-repo</id>
+            <username>admin</username>
+            <password>Anhakq0Asaq08A</password>
+            <configuration>
+                <timeout>1000</timeout>
+            </configuration>
+        </server>
+        <server>
+            <id>yildiz-snapshots</id>
+            <username>admin</username>
+            <password>Anhakq0Asaq08A</password>
+            <configuration>
+                <timeout>1000</timeout>
+            </configuration>
+        </server>
+    </servers>
+
+    <profiles>
+        <profile>
+            <id>yildiz-central</id>
+            <properties>
+                <yildiz-repo.url>https://nexus.ocean.yildiz.domain/maven-releases/</yildiz-repo.url>
+                <yildiz-snapshots.url>https://nexus.ocean.yildiz.domain/maven-snapshots</yildiz-snapshots.url>
+            </properties>
+
+            <repositories>
+                <repository>
+                    <id>yildiz-repo</id>
+                    <name>yildiz-repo</name>
+                    <url>${yildiz-repo}</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </releases>
+                </repository>
+                <repository>
+                    <id>yildiz-snapshots</id>
+                    <name>yildiz-snapshots</name>
+                    <url>${yildiz-snapshots}</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>daily</updatePolicy>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </snapshots>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                </repository>
+            </repositories>
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>yildiz-repo</id>
+                    <name>yildiz-repo</name>
+                    <url>${yildiz-repo}</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <releases>
+                        <enabled>true</enabled>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </releases>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>yildiz-snapshots</id>
+                    <name>yildiz-snapshots</name>
+                    <url>${yildiz-snapshots}</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>daily</updatePolicy>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </snapshots>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>yildiz-central</activeProfile>
+    </activeProfiles>
+
+</settings>

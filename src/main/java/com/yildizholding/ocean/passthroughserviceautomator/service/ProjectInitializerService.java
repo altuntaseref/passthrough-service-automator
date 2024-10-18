@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
@@ -18,6 +19,7 @@ public class ProjectInitializerService {
     public void generateProject(ProjectRequest request) throws IOException {
 
         String url = "https://start.spring.io/starter.zip";
+        request.generatePackageName();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("type", "maven-project")
@@ -76,6 +78,28 @@ public class ProjectInitializerService {
                     }
                 });
             }
+        }
+    }
+    public void createPackageStructure(ProjectRequest request) {
+        try {
+            // Projenin src/main/java dizini
+            Path srcMainJava = Paths.get(request.generateProjectPath(), "src", "main", "java");
+            String packagePath = request.getPackageName().replace(".", File.separator);
+
+            // Paket isimleri
+            String[] packages = {"controller", "service", "config", "model"};
+
+            // Her paket için dizin oluşturma
+            for (String pkg : packages) {
+                Path packageDir = srcMainJava.resolve(Paths.get(packagePath, pkg));
+                if (!Files.exists(packageDir)) {
+                    Files.createDirectories(packageDir);
+                    System.out.println("Paket oluşturuldu: " + packageDir.toString());
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
