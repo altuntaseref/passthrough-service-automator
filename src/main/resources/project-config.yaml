@@ -1,0 +1,10 @@
+projectName: demo-project
+groupId: com.example
+artifactId: demo-project
+packageName: com.example.demo
+dependencies:
+  - web
+  - data-jpa
+javaVersion: 17
+springBootVersion: 3.2.0
+outputPath: C:\Users\serafettin.altuntas\projects\
