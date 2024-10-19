@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class ProjectRequest {
-
     private String projectName;
     private String projectType; // "REST" veya "SOAP"
     private String groupId;
@@ -17,14 +16,14 @@ public class ProjectRequest {
     private List<String> dependencies;
     private String javaVersion;
     private String springBootVersion;
-    private String httpMethod; // "GET", "POST", "PUT", "DELETE"
-    private BasicAuth basicAuth; // "None", "Basic", "Bearer"
-    private boolean parameterInBody;
-    private JsonNode jsonBody;
-    private String modelClassName;
-    private String controllerClassName;
-    private String endpoint;
+    private String authType; // "None", "Basic", "Bearer", vb.
+    private String baseUrl;
+    private String username;
+    private String password;
+    private String apiKey;
     private String systemName;
+    private JsonNode jsonBody; // Genel JSON gövdesi (opsiyonel)
+    private List<ApiRequest> apiRequests;
 
     public void generatePackageName() {
         if (projectName != null && !projectName.isEmpty()) {

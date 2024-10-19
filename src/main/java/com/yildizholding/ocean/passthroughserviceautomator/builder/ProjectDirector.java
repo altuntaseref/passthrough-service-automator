@@ -19,7 +19,9 @@ public class ProjectDirector {
         builder.createLogbackXml(projectRequest);
         builder.addConfigClasses(projectRequest);
         builder.generateModelClasses(projectRequest);
+        builder.generateService(projectRequest);
         builder.generateController(projectRequest);
+
     }
 
 }

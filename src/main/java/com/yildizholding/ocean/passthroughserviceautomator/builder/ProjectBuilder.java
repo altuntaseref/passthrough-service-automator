@@ -18,6 +18,7 @@ public interface ProjectBuilder {
     void createSwaggerConfig(ProjectRequest request);
     void addConfigClasses(ProjectRequest request);
     void generateModelClasses(ProjectRequest request);
+    void generateService(ProjectRequest projectRequest);
     void generateController(ProjectRequest request);
 
     Project getResult();

@@ -1,8 +1,6 @@
 spring.application.name=${projectName}
 
-${systemName}.base-url=${baseUrl}
+${systemName}.baseUrl=${baseUrl}
 ${systemName}.username=${username}
 ${systemName}.password=${password}
-${systemName}.connect-timeout=
-${systemName}.request-timeout=
-
+${systemName}.apiKey=${apiKey}
