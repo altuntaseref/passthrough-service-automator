@@ -351,7 +351,7 @@ public class RestProjectBuilder implements ProjectBuilder {
             args.put("username", request.getUsername());
             args.put("password", request.getPassword());
             args.put("apiKey", request.getApiKey());
-            args.put("systemName", request.getSystemName());
+            args.put("systemName", capitalizeFirstLetter(request.getSystemName()));
 
             String module = request.generateProjectSrcMain() + "java\\" + packageName.replace(".", "\\") + "\\service";
             String fileName = module + "\\" + className + ".java";
