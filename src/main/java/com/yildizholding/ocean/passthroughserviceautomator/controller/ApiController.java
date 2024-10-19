@@ -15,7 +15,6 @@ public class ApiController {
 
     private final ProjectServie projectServie;
 
-
     @PostMapping("/generate")
     public String generateProject(@RequestBody ProjectRequest request) {
      return projectServie.generateProject(request);

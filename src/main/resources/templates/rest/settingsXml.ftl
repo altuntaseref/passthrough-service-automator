@@ -37,7 +37,7 @@
                 <repository>
                     <id>yildiz-repo</id>
                     <name>yildiz-repo</name>
-                    <url>${yildiz-repo}</url>
+                    <url>${yildizRepo}</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -49,7 +49,7 @@
                 <repository>
                     <id>yildiz-snapshots</id>
                     <name>yildiz-snapshots</name>
-                    <url>${yildiz-snapshots}</url>
+                    <url>${yildizSnapshots}</url>
                     <snapshots>
                         <enabled>true</enabled>
                         <updatePolicy>daily</updatePolicy>
@@ -65,7 +65,7 @@
                 <pluginRepository>
                     <id>yildiz-repo</id>
                     <name>yildiz-repo</name>
-                    <url>${yildiz-repo}</url>
+                    <url>${yildizRepo}</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
@@ -77,7 +77,7 @@
                 <pluginRepository>
                     <id>yildiz-snapshots</id>
                     <name>yildiz-snapshots</name>
-                    <url>${yildiz-snapshots}</url>
+                    <url>${yildizSnapshots}</url>
                     <snapshots>
                         <enabled>true</enabled>
                         <updatePolicy>daily</updatePolicy>

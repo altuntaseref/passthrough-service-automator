@@ -1,5 +1,6 @@
 package com.yildizholding.ocean.passthroughserviceautomator.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class ProjectRequest {
     private String httpMethod; // "GET", "POST", "PUT", "DELETE"
     private BasicAuth basicAuth; // "None", "Basic", "Bearer"
     private boolean parameterInBody;
-    private String jsonSchema;
+    private JsonNode jsonBody;
     private String modelClassName;
     private String controllerClassName;
     private String endpoint;
