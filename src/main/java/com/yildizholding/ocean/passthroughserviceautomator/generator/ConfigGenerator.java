@@ -60,7 +60,8 @@ public class ConfigGenerator {
 
             HashMap<String, Object> args = new HashMap<>();
             args.put("packageName", request.getPackageName());
-            args.put("systemName", FileUtils.capitalizeFirstLetter(request.getSystemName()));
+            args.put("systemName", request.getSystemName());
+            args.put("systemClassName", FileUtils.capitalizeFirstLetter(request.getSystemName()));
 
             templateGenerator.generateFromTemplate(templateFile, fileName, args);
         } catch (Exception e) {

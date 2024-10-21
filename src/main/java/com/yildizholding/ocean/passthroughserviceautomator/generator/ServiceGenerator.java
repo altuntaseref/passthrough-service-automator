@@ -25,7 +25,6 @@ public class ServiceGenerator {
             args.put("packageName", packageName);
             args.put("className", className);
             args.put("apiRequests", request.getApiRequests());
-            args.put("authType", request.getAuthType());
             args.put("username", request.getUsername());
             args.put("password", request.getPassword());
             args.put("apiKey", request.getApiKey());
