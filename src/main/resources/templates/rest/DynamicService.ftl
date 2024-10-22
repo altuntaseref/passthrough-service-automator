@@ -31,13 +31,13 @@ this.restTemplate = restTemplate;
 <#-- Path Variables -->
     <#if api.pathParams?? && (api.pathParams?size > 0)>
         <#list api.pathParams?keys as param>
-            String ${param}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
+            String ${fileUtil.toCamelCase(param)}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
         </#list>
     </#if>
 <#-- Query Parameters -->
     <#if api.queryParams?? && (api.queryParams?size > 0)>
         <#list api.queryParams?keys as param>
-            String ${param}<#if param_has_next || api.requestClassName??>, </#if>
+            String ${fileUtil.toCamelCase(param)}<#if param_has_next || api.requestClassName??>, </#if>
         </#list>
     </#if>
 <#-- Request Body -->
@@ -52,7 +52,7 @@ this.restTemplate = restTemplate;
     <#if api.queryParams?? && (api.queryParams?size > 0)>
         StringBuilder queryString = new StringBuilder("?");
         <#list api.queryParams?keys as param>
-            queryString.append("${param}=").append(${param}).append("&");
+            queryString.append("${param}=").append(${fileUtil.toCamelCase(param)}).append("&");
         </#list>
         url += queryString.toString().substring(0, queryString.length() - 1);
     </#if>

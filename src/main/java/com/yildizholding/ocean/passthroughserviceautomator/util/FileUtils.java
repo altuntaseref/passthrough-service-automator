@@ -22,4 +22,24 @@ public class FileUtils {
         String packagePath = request.getPackageName().replace(".", "\\");
         return request.generateProjectSrcMain() + "java\\" + packagePath + "\\" + subPackage;
     }
+
+    public static String toCamelCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // "-" ve "_" karakterlerine göre stringi böl
+        String[] parts = input.split("[-_]");
+        StringBuilder camelCaseString = new StringBuilder(parts[0].toLowerCase());
+
+        // İlk kelimeden sonra gelen kelimelerin ilk harfini büyük yap
+        for (int i = 1; i < parts.length; i++) {
+            if (parts[i].length() > 0) {
+                camelCaseString.append(parts[i].substring(0, 1).toUpperCase());
+                camelCaseString.append(parts[i].substring(1).toLowerCase());
+            }
+        }
+
+        return camelCaseString.toString();
+    }
 }

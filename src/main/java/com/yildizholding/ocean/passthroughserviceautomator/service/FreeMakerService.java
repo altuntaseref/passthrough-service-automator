@@ -1,6 +1,7 @@
 package com.yildizholding.ocean.passthroughserviceautomator.service;
 
 import com.yildizholding.ocean.passthroughserviceautomator.model.FreeMakeModel;
+import com.yildizholding.ocean.passthroughserviceautomator.util.FileUtils;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ public class FreeMakerService {
     public StringWriter createJavaClassesFromTemplates(FreeMakeModel model) {
         try {
             Configuration cfg = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+            cfg.setSharedVariable("fileUtil", new FileUtils());
             Template template = cfg.getTemplate(model.getTemplateFilePath());
             FileWriter myWriter = new FileWriter(model.getFileName());
             StringWriter stringWriter = new StringWriter();

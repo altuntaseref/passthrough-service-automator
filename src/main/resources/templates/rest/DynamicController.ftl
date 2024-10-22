@@ -26,13 +26,13 @@ this.${serviceVarName} = ${serviceVarName};
 <#-- Path Variables -->
     <#if api.pathParams?? && (api.pathParams?size > 0)>
         <#list api.pathParams?keys as param>
-            @PathVariable("${param}") String ${param}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
+            @PathVariable("${param}") String ${fileUtil.toCamelCase(param)}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
         </#list>
     </#if>
 <#-- Query Parameters -->
     <#if api.queryParams?? && (api.queryParams?size > 0)>
         <#list api.queryParams?keys as param>
-            @RequestParam("${param}") String ${param}<#if param_has_next || api.requestClassName??>, </#if>
+            @RequestParam("${param}") String ${fileUtil.toCamelCase(param)}<#if param_has_next || api.requestClassName??>, </#if>
         </#list>
     </#if>
 <#-- Request Body -->
@@ -47,7 +47,7 @@ this.${serviceVarName} = ${serviceVarName};
 <#-- Path Variables -->
     <#if api.pathParams?? && (api.pathParams?size > 0)>
         <#list api.pathParams?keys as param>
-            ${param}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
+            ${fileUtil.toCamelCase(param)}<#if param_has_next || (api.queryParams?? && (api.queryParams?size > 0)) || api.requestClassName??>, </#if>
         </#list>
     </#if>
 <#-- Query Parameters -->
