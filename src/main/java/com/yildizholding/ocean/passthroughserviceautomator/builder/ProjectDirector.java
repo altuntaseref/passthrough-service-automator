@@ -21,6 +21,7 @@ public class ProjectDirector {
         builder.generateModelClasses(projectRequest);
         builder.generateService(projectRequest);
         builder.generateController(projectRequest);
+        builder.generateOceanLinks(projectRequest);
 
     }
 

@@ -1,6 +1,7 @@
 package com.yildizholding.ocean.passthroughserviceautomator.controller;
 
 import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectResponse;
 import com.yildizholding.ocean.passthroughserviceautomator.model.ResponseModel;
 import com.yildizholding.ocean.passthroughserviceautomator.model.UserModel;
 import com.yildizholding.ocean.passthroughserviceautomator.service.ProjectServie;
@@ -18,7 +19,7 @@ public class ApiController {
     private final ProjectServie projectServie;
 
     @PostMapping("/generate")
-    public String generateProject(@RequestBody ProjectRequest request) {
+    public ProjectResponse generateProject(@RequestBody ProjectRequest request) {
      return projectServie.generateProject(request);
     }
 

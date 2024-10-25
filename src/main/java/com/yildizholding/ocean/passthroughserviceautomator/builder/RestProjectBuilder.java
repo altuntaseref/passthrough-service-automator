@@ -5,9 +5,13 @@ import com.yildizholding.ocean.passthroughserviceautomator.generator.ControllerG
 import com.yildizholding.ocean.passthroughserviceautomator.generator.ModelGenerator;
 import com.yildizholding.ocean.passthroughserviceautomator.generator.ServiceGenerator;
 import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
+import com.yildizholding.ocean.passthroughserviceautomator.service.ServiceRegistrationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -19,6 +23,10 @@ public class RestProjectBuilder implements ProjectBuilder {
     private final ServiceGenerator serviceGenerator;
     private final ControllerGenerator controllerGenerator;
     private final ConfigGenerator configGenerator;
+
+    private List<RegisterServiceResponse> registerServiceResponses;
+
+    private final ServiceRegistrationService serviceRegistrationService;
 
     @Override
     public void createBaseProject(ProjectRequest request) {
@@ -91,7 +99,17 @@ public class RestProjectBuilder implements ProjectBuilder {
     }
 
     @Override
-    public Project getResult() {
-        return new Project();
+    public List<RegisterServiceResponse> generateOceanLinks(ProjectRequest request) {
+        this.registerServiceResponses = serviceRegistrationService.registerService(request.getProjectName(), request.getApiRequests());
+        return serviceRegistrationService.registerService(request.getProjectName(), request.getApiRequests());
     }
+
+    @Override
+    public Project getResult() {
+        Project project = new Project();
+        project.setProjectPath("");
+        project.setRegisterServiceResponses(this.registerServiceResponses);
+        return project;
+    }
+
 }

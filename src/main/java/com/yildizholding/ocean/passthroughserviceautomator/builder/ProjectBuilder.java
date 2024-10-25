@@ -1,8 +1,10 @@
 package com.yildizholding.ocean.passthroughserviceautomator.builder;
 
 import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface ProjectBuilder {
 
@@ -20,6 +22,8 @@ public interface ProjectBuilder {
     void generateModelClasses(ProjectRequest request);
     void generateService(ProjectRequest projectRequest);
     void generateController(ProjectRequest request);
+
+    List<RegisterServiceResponse> generateOceanLinks(ProjectRequest request);
 
     Project getResult();
 

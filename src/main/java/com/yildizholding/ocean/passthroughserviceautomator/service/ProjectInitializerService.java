@@ -2,6 +2,8 @@ package com.yildizholding.ocean.passthroughserviceautomator.service;
 
 
 import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -13,7 +15,10 @@ import java.nio.file.*;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProjectInitializerService {
+
+    private final ServiceRegistrationService serviceRegistrationService;
 
 
     public void generateProject(ProjectRequest request) throws IOException {
@@ -102,4 +107,7 @@ public class ProjectInitializerService {
             e.printStackTrace();
         }
     }
+
+
+
 }
