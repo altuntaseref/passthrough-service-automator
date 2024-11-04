@@ -1,6 +1,6 @@
 spring.application.name=${projectName}
 
-${systemName}.base-url=${baseUrl}
+${systemName}.baseUrl=${baseUrl}
 ${systemName}.username=${username}
 ${systemName}.password=${password}
-${systemName}.api-key=${apiKey}
+${systemName}.apiKey=${apiKey}

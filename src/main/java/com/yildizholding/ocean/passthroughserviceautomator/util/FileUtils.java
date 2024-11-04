@@ -1,6 +1,6 @@
 package com.yildizholding.ocean.passthroughserviceautomator.util;
 
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 
 public class FileUtils {
 
@@ -18,7 +18,7 @@ public class FileUtils {
         return str.substring(0, 1).toLowerCase() + str.substring(1);
     }
 
-    public static String getModulePath(ProjectRequest request, String subPackage) {
+    public static String getModulePath(RestProjectRequest request, String subPackage) {
         String packagePath = request.getPackageName().replace(".", "\\");
         return request.generateProjectSrcMain() + "java\\" + packagePath + "\\" + subPackage;
     }

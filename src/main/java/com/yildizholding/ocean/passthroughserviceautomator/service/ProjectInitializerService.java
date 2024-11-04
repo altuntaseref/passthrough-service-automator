@@ -1,8 +1,8 @@
 package com.yildizholding.ocean.passthroughserviceautomator.service;
 
 
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
-import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
+import com.yildizholding.ocean.passthroughserviceautomator.config.ProjectConfig;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,30 +12,28 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.*;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectInitializerService {
 
-    private final ServiceRegistrationService serviceRegistrationService;
 
 
-    public void generateProject(ProjectRequest request) throws IOException {
-
+    public void generateProject(RestProjectRequest request) throws IOException {
+        ProjectConfig requestFromYaml = ProjectConfig.getInstance();
         String url = "https://start.spring.io/starter.zip";
         request.generatePackageName();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("type", "maven-project")
                 .queryParam("language", "java")
-                .queryParam("bootVersion", request.getSpringBootVersion())
-                .queryParam("javaVersion", request.getJavaVersion())
-                .queryParam("groupId", request.getGroupId())
-                .queryParam("artifactId", request.getArtifactId())
+                .queryParam("bootVersion", requestFromYaml.getSpringBootVersion())
+                .queryParam("javaVersion", requestFromYaml.getJavaVersion())
+                .queryParam("groupId", requestFromYaml.getGroupId())
+                .queryParam("artifactId", request.getProjectName())
                 .queryParam("name", request.getProjectName())
                 .queryParam("packageName", request.getPackageName())
-                .queryParam("dependencies", String.join(",", request.getDependencies()));
+                .queryParam("dependencies", String.join(",", requestFromYaml.getDependencies()));
 
         URI uri = builder.build().encode().toUri();
 
@@ -48,7 +46,7 @@ public class ProjectInitializerService {
         Files.write(zipPath, zipBytes);
 
         // Projenin çıkarılacağı dizini belirleme (outputPath)
-        Path extractDir = Paths.get(request.getOutputPath(), request.getProjectName());
+        Path extractDir = Paths.get(requestFromYaml.getOutputPath(), request.getProjectName());
         if (!Files.exists(extractDir)) {
             Files.createDirectories(extractDir); // Klasörü oluştur
         }
@@ -85,7 +83,7 @@ public class ProjectInitializerService {
             }
         }
     }
-    public void createPackageStructure(ProjectRequest request) {
+    public void createPackageStructure(RestProjectRequest request) {
         try {
             // Projenin src/main/java dizini
             Path srcMainJava = Paths.get(request.generateProjectPath(), "src", "main", "java");

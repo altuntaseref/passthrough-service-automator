@@ -1,7 +1,7 @@
 package com.yildizholding.ocean.passthroughserviceautomator.generator;
 
 import com.yildizholding.ocean.passthroughserviceautomator.config.ProjectConfig;
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import com.yildizholding.ocean.passthroughserviceautomator.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class ConfigGenerator {
 
     private final TemplateGenerator templateGenerator;
 
-    public void updatePomXml(ProjectRequest request) {
+    public void updatePomXml(RestProjectRequest request) {
         try {
             String outputPath = ProjectConfig.getInstance().getOutputPath();
 
@@ -34,7 +34,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createInboundRequestLoggingFilterConfig(ProjectRequest request) {
+    public void createInboundRequestLoggingFilterConfig(RestProjectRequest request) {
         try {
             String packagePath = request.getPackageName().replace(".", File.separator);
             String module = request.generateProjectSrcMain() + "java\\" + packagePath + "\\config";
@@ -50,7 +50,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createServiceConfig(ProjectRequest request) {
+    public void createServiceConfig(RestProjectRequest request) {
         try {
             String packagePath = request.getPackageName().replace(".", File.separator);
             String module = request.generateProjectSrcMain() + "java\\" + packagePath + "\\config";
@@ -69,7 +69,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createApplicationProperties(ProjectRequest request) {
+    public void createApplicationProperties(RestProjectRequest request) {
         try {
             String module = request.generateProjectSrcMain() + "resources";
             String fileName = String.format("%s\\application-dev.properties", module);
@@ -89,7 +89,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createBootStrap(ProjectRequest request) {
+    public void createBootStrap(RestProjectRequest request) {
         try {
             String module = request.generateProjectSrcMain() + "resources";
             String fileName = String.format("%s\\bootstrap.properties", module);
@@ -104,7 +104,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createLogbackXml(ProjectRequest request) {
+    public void createLogbackXml(RestProjectRequest request) {
         try {
             String module = request.generateProjectSrcMain() + "resources";
             String fileName = String.format("%s\\logback.xml", module);
@@ -120,7 +120,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createSettingsXml(ProjectRequest request) {
+    public void createSettingsXml(RestProjectRequest request) {
         try {
             String module = request.generateProjectPath();
             String fileName = String.format("%s\\settings.xml", module);
@@ -137,7 +137,7 @@ public class ConfigGenerator {
         }
     }
 
-    public void createSwaggerConfig(ProjectRequest request) {
+    public void createSwaggerConfig(RestProjectRequest request) {
         try {
             String packagePath = request.getPackageName().replace(".", File.separator);
             String module = request.generateProjectSrcMain() + "java\\" + packagePath + "\\config";

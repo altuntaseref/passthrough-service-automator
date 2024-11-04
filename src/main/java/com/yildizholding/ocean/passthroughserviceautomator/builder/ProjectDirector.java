@@ -1,28 +1,27 @@
 package com.yildizholding.ocean.passthroughserviceautomator.builder;
 
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProjectDirector {
 
-    public void constructProject(ProjectBuilder builder, ProjectRequest projectRequest){
-        builder.createBaseProject(projectRequest);
-        builder.createPackages(projectRequest);
-        builder.updatePomXml(projectRequest);
-        builder.createInboundRequestLoggingFilterConfig(projectRequest);
-        builder.createServiceConfig(projectRequest);
-        builder.createApplicationProperties(projectRequest);
-        builder.createBootStrap(projectRequest);
-        builder.createSettingsXml(projectRequest);
-        builder.createSwaggerConfig(projectRequest);
-        builder.createLogbackXml(projectRequest);
-        builder.addConfigClasses(projectRequest);
-        builder.generateModelClasses(projectRequest);
-        builder.generateService(projectRequest);
-        builder.generateController(projectRequest);
-        builder.generateOceanLinks(projectRequest);
+    public void constructProject(RestProjectBuilder builder, RestProjectRequest restProjectRequest){
+        builder.createBaseProject(restProjectRequest);
+        builder.createPackages(restProjectRequest);
+        builder.updatePomXml(restProjectRequest);
+        builder.createInboundRequestLoggingFilterConfig(restProjectRequest);
+        builder.createServiceConfig(restProjectRequest);
+        builder.createApplicationProperties(restProjectRequest);
+        builder.createBootStrap(restProjectRequest);
+        builder.createSettingsXml(restProjectRequest);
+        builder.createSwaggerConfig(restProjectRequest);
+        builder.createLogbackXml(restProjectRequest);
+        builder.addConfigClasses(restProjectRequest);
+        builder.generateService(restProjectRequest);
+        builder.generateController(restProjectRequest);
 
     }
+
 
 }

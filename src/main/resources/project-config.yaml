@@ -1,10 +1,10 @@
 projectName: demo-project
-groupId: com.example
+groupId: com.yildizholding.ocean
 artifactId: demo-project
 packageName: com.example.demo
 dependencies:
   - web
   - data-jpa
 javaVersion: 17
-springBootVersion: 3.2.0
-outputPath: C:\\Users\\serafettin.altuntas\\projects\\
+springBootVersion: 3.4.4
+outputPath: C:\\Users\\seraf\\Desktop\\passthroguh-projects\\

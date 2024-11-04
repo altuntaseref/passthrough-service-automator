@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.codemodel.JCodeModel;
 import com.yildizholding.ocean.passthroughserviceautomator.model.ApiRequest;
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jsonschema2pojo.*;
 import org.jsonschema2pojo.rules.RuleFactory;
@@ -18,21 +18,21 @@ import java.util.Comparator;
 @Service
 public class ModelGenerator {
 
-    public void generateModelClasses(ProjectRequest request) {
+    public void generateModelClasses(RestProjectRequest request) {
         try {
             String packageName = request.getPackageName() + ".model";
             Path outputDir = Paths.get(request.generateProjectPath(), "src", "main", "java");
 
-            for (ApiRequest api : request.getApiRequests()) {
-                // İstek gövdesi için model sınıfı oluşturma
-                if (api.getRequestBody() != null && api.getRequestClassName() != null) {
-                    createModelClass(api.getRequestClassName(), api.getRequestBody(), packageName, outputDir);
-                }
-                // Yanıt için model sınıfı oluşturma
-                if (api.getResponseBody() != null && api.getResponseClassName() != null) {
-                    createModelClass(api.getResponseClassName(), api.getResponseBody(), packageName, outputDir);
-                }
-            }
+//            for (ApiRequest api : request.getApiRequests()) {
+//                // İstek gövdesi için model sınıfı oluşturma
+//                if (api.getRequestBody() != null && api.getRequestClassName() != null) {
+//                    createModelClass(api.getRequestClassName(), api.getRequestBody(), packageName, outputDir);
+//                }
+//                // Yanıt için model sınıfı oluşturma
+//                if (api.getResponseBody() != null && api.getResponseClassName() != null) {
+//                    createModelClass(api.getResponseClassName(), api.getResponseBody(), packageName, outputDir);
+//                }
+//            }
         } catch (Exception e) {
             log.error("Model sınıfları oluşturulurken hata oluştu", e);
         }

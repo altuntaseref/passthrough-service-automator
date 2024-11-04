@@ -1,7 +1,6 @@
-package com.yildizholding.ocean.passthroughserviceautomator.builder;
+package com.yildizholding.ocean.passthroughserviceautomator.service;
 
-import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectRequest;
-import com.yildizholding.ocean.passthroughserviceautomator.service.ProjectInitializerService;
+import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ public class ProjectInitializer {
 
     private final ProjectInitializerService projectInitializerService;
 
-    public void createBaseProject(ProjectRequest request) {
+    public void createBaseProject(RestProjectRequest request) {
         try {
             projectInitializerService.generateProject(request);
         } catch (Exception e) {
@@ -21,7 +20,7 @@ public class ProjectInitializer {
         }
     }
 
-    public void createPackages(ProjectRequest request) {
+    public void createPackages(RestProjectRequest request) {
         try {
             projectInitializerService.createPackageStructure(request);
         } catch (Exception e) {

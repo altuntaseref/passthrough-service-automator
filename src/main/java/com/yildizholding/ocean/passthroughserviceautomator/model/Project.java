@@ -1,6 +1,5 @@
-package com.yildizholding.ocean.passthroughserviceautomator.builder;
+package com.yildizholding.ocean.passthroughserviceautomator.model;
 
-import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
 import lombok.Data;
 
 import java.util.List;
