@@ -25,4 +25,14 @@ public class ProjectDirector {
 
     }
 
+    public void constructEmptyProject(ProjectBuilder builder, ProjectRequest projectRequest){
+        builder.createBaseProject(projectRequest);
+        builder.createPackages(projectRequest);
+        builder.updatePomXml(projectRequest);
+        builder.createInboundRequestLoggingFilterConfig(projectRequest);
+        builder.createBootStrap(projectRequest);
+        builder.createSettingsXml(projectRequest);
+        builder.createLogbackXml(projectRequest);
+    }
+
 }

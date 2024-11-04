@@ -5,7 +5,7 @@ import com.yildizholding.ocean.passthroughserviceautomator.model.ApiRequest;
 import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceRequest;
 import com.yildizholding.ocean.passthroughserviceautomator.model.RegisterServiceResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+
 import org.springframework.web.client.RestTemplate;
 
 import java.security.SecureRandom;
