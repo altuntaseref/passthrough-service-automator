@@ -2,6 +2,11 @@ package com.yildizholding.ocean.passthroughserviceautomator.util;
 
 import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class FileUtils {
 
     public static String capitalizeFirstLetter(String str) {
@@ -22,7 +27,16 @@ public class FileUtils {
         String packagePath = request.getPackageName().replace(".", "\\");
         return request.generateProjectSrcMain() + "java\\" + packagePath + "\\" + subPackage;
     }
-
+    public static void ensureDirectoryExists(String filePath) throws IOException {
+        if (filePath == null || filePath.isBlank()) {
+            return; // Dosya yolu yoksa bir şey yapma
+        }
+        Path path = Paths.get(filePath);
+        Path parentDir = path.getParent();
+        if (parentDir != null && !Files.exists(parentDir)) {
+            Files.createDirectories(parentDir);
+        }
+    }
     public static String toCamelCase(String input) {
         if (input == null || input.isEmpty()) {
             return input;

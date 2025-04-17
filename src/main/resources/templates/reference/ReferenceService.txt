@@ -1,0 +1,111 @@
+
+package com.yildizholding.ocean.mobisngnextstationserviceapi.service;
+
+import com.yildizholding.ocean.mobisngnextstationserviceapi.config.MemConfig;
+import com.yildizholding.ocean.mobisngnextstationserviceapi.model.TokenModel;
+import com.yildizholding.ocean.mobisngnextstationserviceapi.model.TokenRequestModel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j public class MemPassthroughService {
+    private final RestTemplate restTemplate;
+    private final MemConfig memConfig;
+
+
+
+
+
+    /**
+     * Repair defect in Mem service     * @return Response entity containing repair operation result
+     */
+    public ResponseEntity<Object> defectRepair(Object defectRepairRequest) {
+        String url = memConfig.getBaseUrl() + "/external-service/api/mem/mem-defect-repair";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBearerAuth(getToken());
+        HttpEntity<Object> entity = new HttpEntity<>(defectRepairRequest, headers);
+        try {
+            return restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+        } catch (HttpStatusCodeException e) {
+            HttpStatus statusCode = e.getStatusCode();
+            String errorResponse = e.getResponseBodyAsString();
+            return ResponseEntity.status(statusCode).body(errorResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get dealers from Mem service     * @return Response entity containing dealers data
+     */
+    public ResponseEntity<Object> getDealers() {
+        String url = memConfig.getBaseUrl() + "/external-service/api/mem/mem-get-dealers";
+        return sendGetRequest(url, null);
+    }
+
+    /**
+     * Get sales representatives from Mem service     * @param idSalesOfficeCode The sales office code     * @return Response entity containing sales representatives data
+     */
+    public ResponseEntity<Object> getSalesRepresentatives(String idSalesOfficeCode) {
+        String url = memConfig.getBaseUrl() + "/external-service/api/mem/mem-get-sales-represantatives";
+        return sendGetRequest(url, Map.of("IdSalesOfficeCode", idSalesOfficeCode));
+    }
+
+
+    /**
+     * Get token from Mem service     * @return Response entity containing token
+     */
+    public String getToken() {
+        String url = memConfig.getBaseUrl() + "/external-service/api/Token/get-token";
+        TokenRequestModel tokenRequestModel = new TokenRequestModel(memConfig.getUsername(), memConfig.getPassword());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.TEXT_PLAIN));
+        headers.setBearerAuth(memConfig.getIntegrationToken());
+        HttpEntity<Object> entity = new HttpEntity<>(tokenRequestModel, headers);
+        try {
+            TokenModel tokenModel = restTemplate.exchange(url, HttpMethod.POST, entity, TokenModel.class).getBody();
+            return tokenModel.getData().getApiToken();
+        } catch (Exception e) {
+            log.error("Internal Server Error: " + e.getMessage());
+            return "Internal Server Error: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Helper method to send GET requests with query parameters     * @param url The API endpoint URL     * @param queryParams Map of query parameters (can be null)     * @return Response entity with the API response
+     */
+    private ResponseEntity<Object> sendGetRequest(String url, Map<String, String> queryParams) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBearerAuth(getToken());
+        HttpEntity<Object> entity = new HttpEntity<>(headers);
+        try {
+            if (queryParams != null && !queryParams.isEmpty()) {
+                UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+                queryParams.forEach(builder::queryParam);
+                url = builder.toUriString();
+            }
+            return restTemplate.exchange(url, HttpMethod.GET, entity, Object.class);
+        } catch (HttpStatusCodeException e) {
+            HttpStatus statusCode = e.getStatusCode();
+            String errorResponse = e.getResponseBodyAsString();
+            return ResponseEntity.status(statusCode).body(errorResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error: " + e.getMessage());
+        }
+    }
+}

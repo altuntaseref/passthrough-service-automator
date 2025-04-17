@@ -20,6 +20,8 @@ public class RestProjectRequest  {
     private String apiKey;
     private String systemName;
     private Boolean sslCerIsRequired;
+//    private String postmanCollectionJson; // Postman Collection JSON içeriğini tutacak
+
 //    private String authenticationPrompt;
 //    private List<String> methodPrompts;
 //    private List<ApiRequest> apiRequests;

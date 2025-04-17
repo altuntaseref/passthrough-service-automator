@@ -1,0 +1,24 @@
+
+package com.yildizholding.ocean.mobisngnextstationserviceapi.controller;import com.yildizholding.ocean.mobisngnextstationserviceapi.service.MemPassthroughService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1")
+@RequiredArgsConstructor
+public class MemController {
+    private final MemPassthroughService memService;
+    @PostMapping("/defect-repair")
+    public ResponseEntity<Object> defectRepair(@RequestBody Object defectRepairRequest) {
+        return memService.defectRepair(defectRepairRequest);
+    }
+    @GetMapping("/dealers")
+    public ResponseEntity<Object> getDealers() {
+        return memService.getDealers();
+    }
+    @GetMapping("/sales-representatives")
+    public ResponseEntity<Object> getSalesRepresentatives(@RequestParam String IdSalesOfficeCode) {
+        return memService.getSalesRepresentatives(IdSalesOfficeCode);
+    }
+}

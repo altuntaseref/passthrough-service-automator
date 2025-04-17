@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class GeminiApiService {
+public class LlmService {
 
     private final ChatClient.Builder builder;
 
 
-    public String generateContentFromGemini(String text) {
+    public String getCompletion(String text) {
         var client = builder.build();
         var response = client.prompt(text)
                 .call()
