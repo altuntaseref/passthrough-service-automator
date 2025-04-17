@@ -24,21 +24,16 @@ public class ProjectServie {
     public ProjectResponse generateProject(RestProjectRequest request) {
         ProjectResponse response = new ProjectResponse();
         try {
-
-                projectDirector.constructProject(restProjectBuilderImpl, request);
-                Project project = restProjectBuilderImpl.getResult();
-                response.setProjectPath(project.getProjectPath());
-
-
-
-                response.setMessage("Proje başarıyla oluşturuldu.");
+            projectDirector.constructProject(restProjectBuilderImpl, request);
+            Project project = restProjectBuilderImpl.getResult();
+            response.setProjectPath(project.getProjectPath());
+            response.setMessage("Proje başarıyla oluşturuldu.");
         } catch (Exception e) {
             e.printStackTrace();
             response.setMessage("Proje oluşturulurken hata oluştu: " + e.getMessage());
         }
         return response;
     }
-
 
 
 }

@@ -82,10 +82,10 @@ public class RestProjectBuilderImpl implements RestProjectBuilder {
         // Gerekirse ekleyebilirsiniz
     }
 
-    @Override
-    public void generateModelClasses(RestProjectRequest request) {
-        modelGenerator.generateModelClasses(request);
-    }
+//    @Override
+//    public void generateModelClasses(RestProjectRequest request) {
+//        modelGenerator.generateModelClasses(request);
+//    }
 
     @Override
     public void generateService(RestProjectRequest request) {

@@ -4,7 +4,7 @@ import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequ
 
 public interface RestProjectBuilder extends ProjectBuilder {
     void createSwaggerConfig(RestProjectRequest request);
-    void generateModelClasses(RestProjectRequest request);
+//    void generateModelClasses(RestProjectRequest request);
     void generateService(RestProjectRequest restProjectRequest);
     void generateController(RestProjectRequest request);
     void createPackages(RestProjectRequest request);

@@ -23,12 +23,4 @@ public class ApiController {
      return projectServie.generateProject(request);
     }
 
-    @PostMapping("/getResponse")
-    public ResponseModel getResponse(@RequestBody UserModel userModel){
-        ResponseModel responseModel = new ResponseModel();
-        responseModel.setCustomers("customer123");
-        responseModel.setDetails("NoDetail");
-        return responseModel;
-    }
-
 }
