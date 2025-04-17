@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
 import java.util.List;
 
 @Getter
@@ -66,5 +67,28 @@ public class RestProjectRequest  {
             return null;
         }
     }
-
+    /**
+     * Projenin src/test dizininin yolunu oluşturur.
+     * Örn: C:\path\to\projects\my-project\src\test\
+     *
+     * @return Oluşturulan src/test yolu veya hata durumunda null.
+     */
+    public String generateProjectSrcTest() {
+        try {
+            // ProjectConfig singleton'ından çıktı yolunu al
+            String outputPath = ProjectConfig.getInstance().getOutputPath();
+            if (outputPath == null || projectName == null || projectName.isBlank()) {
+                System.err.println("Hata: Proje adı veya çıktı yolu eksik/geçersiz.");
+                return null;
+            }
+            // İşletim sisteminden bağımsız yol oluştur
+            String projectPath = outputPath + File.separator + projectName + File.separator + "src" + File.separator + "test" + File.separator;
+            return projectPath;
+        } catch (Exception e) {
+            // ProjectConfig veya path birleştirme sırasında hata olursa
+            System.err.println("generateProjectSrcTest metodu hatası: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
