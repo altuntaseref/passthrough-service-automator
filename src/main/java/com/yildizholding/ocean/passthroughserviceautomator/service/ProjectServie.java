@@ -7,151 +7,144 @@ import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequ
 import com.yildizholding.ocean.passthroughserviceautomator.model.kong.OceanServiceRegisterResponseModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProjectServie { // Sınıf adını ProjectService olarak değiştirmek daha iyi olabilir
+public class ProjectServie { // Sınıf adı ProjectService olmalı
 
-    // Ana Orkestrasyon Bağımlılıkları
-    private final RestProjectBuilderImpl restProjectBuilderImpl; // Veya Interface'i: RestProjectBuilder
+    // Gerekli servisler
+    private final RestProjectBuilderImpl restProjectBuilder;
     private final ProjectDirector projectDirector;
+    private final ResourceReaderService resourceReaderService; // Eklendi (Controller okumak için)
+    private final PromptGenerationService promptGenerationService; // Eklendi
     private final CodeEnhancementService codeEnhancementService;
     private final GeneratedCodeWriterService codeWriterService;
-    private final GitLabService gitLabService; // GitLab servisi inject edildi
-    private final KongIntegrationService kongIntegrationService; // Kong entegrasyon servisi inject edildi
+    private final KongIntegrationService kongIntegrationService;
+    private final DocumentationGeneratorService documentationGeneratorService;
+    private final GitLabService gitLabService;
 
-
-    /**
-     * Yeni bir REST projesi oluşturur.
-     */
     public ProjectResponse generateProject(RestProjectRequest request, MultipartFile postmanFile) {
         ProjectResponse response = new ProjectResponse();
         String projectPath = request.generateProjectPath();
+        response.setProjectPath(projectPath); // Proje yolunu başta ayarla
 
-        boolean gitPushAttempted = false; // Git push denendi mi?
-        boolean gitPushSucceeded = false; // Git push başarılı mı?
-
-        boolean projectFilesGenerated = false;
-        if (projectPath == null) {
-            response.setMessage("Proje yolu oluşturulamadı.");
-            log.error("Proje yolu null döndü.");
-            return response;
-        }
-        response.setProjectPath(projectPath);
+        OceanServiceRegisterResponseModel kongData = null;
+        List<String> generatedDocFiles = List.of();
+        String finalCommitMessage = "Automated project generation";
 
         try {
-            // --- Postman Dosyasını Oku ---
-            if (postmanFile == null || postmanFile.isEmpty()) {
-                throw new IllegalArgumentException("Postman Collection dosyası yüklenmedi veya boş.");
+            // --- 1. Hazırlık ve İskelet ---
+            log.info("Adım 1: Hazırlık ve İskelet Oluşturma...");
+            if (projectPath == null) throw new IllegalArgumentException("Proje yolu oluşturulamadı.");
+            if (postmanFile == null || postmanFile.isEmpty()) throw new IllegalArgumentException("Postman dosyası eksik.");
+            String postmanContent = new String(postmanFile.getBytes(), StandardCharsets.UTF_8); // getBytes düzeltildi
+            // Gerekirse packageName'i oluştur
+            if (request.getPackageName() == null || request.getPackageName().isBlank()) {
+                request.generatePackageName();
+                if(request.getPackageName() == null) throw new IllegalStateException("Paket adı oluşturulamadı.");
             }
-            log.info("Yüklenen Postman dosyası okunuyor: {}", postmanFile.getOriginalFilename());
-            String postmanCollectionContent = new String(postmanFile.getBytes(), StandardCharsets.UTF_8);
-            log.info("Postman dosyası başarıyla okundu.");
+            projectDirector.constructProject(restProjectBuilder, request);
+            log.info("Adım 1 tamamlandı.");
 
-            // --- Aşama 1: Proje İskeletini Oluştur ---
-            log.info("Aşama 1: Proje iskeleti ve şablon tabanlı sınıflar oluşturuluyor...");
-            projectDirector.constructProject(restProjectBuilderImpl, request);
-            log.info("Aşama 1 tamamlandı. Proje iskeleti: {}", projectPath);
+            // --- 2. LLM ile Kod Geliştirme ve Yazma ---
+            log.info("Adım 2: LLM ile Kod Geliştirme...");
+            // Prompt oluşturmak için gerekli şablonları oku
+            String controllerTemplate = resourceReaderService.readGeneratedTemplateContent(request, "controller")
+                    .orElseThrow(() -> new IOException("Başlangıç Controller şablonu okunamadı."));
+            String serviceTemplate = resourceReaderService.readGeneratedTemplateContent(request, "service")
+                    .orElseThrow(() -> new IOException("Başlangıç Service şablonu okunamadı."));
+            // Prompt'u oluştur
+            String prompt = promptGenerationService.buildLlmPrompt(request, controllerTemplate, serviceTemplate, postmanContent);
+            // LLM'i çağır ve kodu ayrıştır/yaz (CodeEnhancementService içinde yapılmalı)
+            Optional<Map<Path, String>> codeMapOpt = codeEnhancementService.enhanceCode(request, prompt); // enhanceCode prompt almalı
 
-            // --- Aşama 2: LLM ile Kodu Geliştir ve Yaz ---
-            log.info("Aşama 2: LLM ile kod geliştirme ve yazma başlatılıyor...");
-            Optional<Map<Path, String>> aiGeneratedCodeMapOpt = codeEnhancementService.enhanceCode(request, postmanCollectionContent);
-
-            if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
-                codeWriterService.writeCodeFiles(aiGeneratedCodeMapOpt.get(), request);
-                response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi.");
-                projectFilesGenerated = true;
-                log.info("Aşama 2 tamamlandı.");
+            if (codeMapOpt.isPresent() && !codeMapOpt.get().isEmpty()) {
+                codeWriterService.writeCodeFiles(codeMapOpt.get(), request);
+                log.info("Adım 2 tamamlandı: LLM kodları yazıldı.");
+                finalCommitMessage += " with LLM enhancements";
             } else {
-                response.setMessage("Proje iskeleti oluşturuldu, ancak LLM kodları alınamadı/boş. Şablonlar kullanılıyor.");
-                projectFilesGenerated = true;
-                log.warn("Aşama 2 tamamlanamadı veya LLM yanıtı boş.");
+                log.warn("Adım 2: LLM kodları alınamadı/boş. Sadece iskelet kullanılacak.");
             }
-            // Sadece proje dosyaları başarıyla oluşturulduysa ve GitLab URL'si varsa push et
-            if (projectFilesGenerated && request.getGitlabRepoUrl() != null && !request.getGitlabRepoUrl().isBlank()) {
-                log.info("Aşama 3: Proje GitLab deposuna push edilecek...");
+
+            // --- 3. Kong Kaydı (İsteğe Bağlı) ---
+            if (request.isRegisterOnKong()) { // isRegisterOnKong düzeltildi (modelde olmalı)
+                log.info("Adım 3: Servis Kong'a kaydediliyor...");
                 try {
-                    gitLabService.pushProjectToGitLab(projectPath, request.getGitlabRepoUrl());
-                    gitPushSucceeded = true;
-                    // Başarılı mesajını ayarla
-                    if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
-                        response.setMessage("Proje başarıyla oluşturuldu, LLM kodları entegre edildi ve GitLab'e push edildi.");
+                    kongData = kongIntegrationService.registerServiceOnKong(request);
+                    if (kongData != null && "Success".equalsIgnoreCase(kongData.getResult())) {
+                        log.info("Adım 3 tamamlandı: Kong kaydı başarılı.");
+                        finalCommitMessage += ", Kong registration";
                     } else {
-                        response.setMessage("Proje iskeleti başarıyla oluşturuldu ve GitLab'e push edildi (LLM kodu olmadan).");
+                        log.error("Adım 3 başarısız: Kong kaydı yapılamadı veya başarısız yanıt.");
                     }
-                    log.info("Aşama 3 tamamlandı: Proje GitLab'e başarıyla push edildi.");
-                } catch (GitAPIException | IOException | IllegalArgumentException e) {
-                    gitPushSucceeded = false;
-                    log.error("Proje GitLab'e push edilirken hata oluştu!", e);
-                    // Hata mesajını ayarla ama işlem başarılı kabul edilebilir (yerelde oluşturuldu)
-                    if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
-                        response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi, ancak GitLab'e pushlanamadı: " + e.getMessage());
-                    } else {
-                        response.setMessage("Proje iskeleti başarıyla oluşturuldu, ancak GitLab'e pushlanamadı: " + e.getMessage());
-                    }
+                } catch (Exception e) {
+                    log.error("Adım 3 başarısız: Kong kaydı sırasında hata oluştu!", e);
                 }
-            } else if (projectFilesGenerated) {
-                // GitLab URL yoksa bilgilendirme mesajı
-                log.info("GitLab URL'si sağlanmadığı için GitLab'e pushlama atlandı.");
-                if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
-                    response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi (GitLab push atlandı).");
+            } else {
+                log.info("Adım 3 atlandı: Kong kaydı istenmedi.");
+            }
+
+            // --- 4. Dokümantasyon Oluşturma ---
+            log.info("Adım 4: Dokümantasyon (Readme, Postman) oluşturuluyor...");
+            try {
+                generatedDocFiles = documentationGeneratorService.generateDocumentation(request, kongData, projectPath); // projectPath eklendi
+                if (!generatedDocFiles.isEmpty()) {
+                    log.info("Adım 4 tamamlandı: Dokümantasyon dosyaları oluşturuldu: {}", generatedDocFiles);
+                    finalCommitMessage += " and documentation";
                 } else {
-                    response.setMessage("Proje iskeleti başarıyla oluşturuldu (GitLab push atlandı).");
+                    log.warn("Adım 4: Dokümantasyon dosyaları oluşturulamadı.");
                 }
-            } else {
-                // Eğer proje dosyaları hiç oluşturulamadıysa (Aşama 1 veya 2'de hata)
-                response.setMessage("Proje dosyaları oluşturulamadığı için GitLab'e pushlanamadı.");
+            } catch (Exception e) {
+                log.error("Adım 4 başarısız: Dokümantasyon oluşturulurken hata oluştu!", e);
             }
 
-            // --- Aşama 4: Kong'a Kaydet (Eğer proje oluşturulduysa) ---
-            if (projectFilesGenerated) {
-                log.info("Aşama 4: Servis Kong API Gateway'e kaydedilecek...");
-                OceanServiceRegisterResponseModel kongResponse = kongIntegrationService.registerServiceOnKong(request);
-
-                // --- Nihai Yanıt Mesajını Oluştur ---
-                if (kongResponse != null && "Success".equalsIgnoreCase(kongResponse.getResult())) {
-                    log.info("Aşama 4 tamamlandı: Kong kaydı başarılı.");
-                    if (gitPushAttempted && gitPushSucceeded) {
-                        response.setMessage("Proje oluşturuldu, GitLab'e push edildi ve Kong'a kaydedildi.");
-                    } else if (gitPushAttempted && !gitPushSucceeded) {
-                        response.setMessage("Proje oluşturuldu, Kong'a kaydedildi ancak GitLab'e push edilemedi.");
-                    } else { // Git push hiç denenmedi
-                        response.setMessage("Proje oluşturuldu ve Kong'a kaydedildi (GitLab push atlandı).");
-                    }
-                } else { // Kong kaydı başarısız
-                    log.error("Kong servis kaydı başarısız oldu.");
-                    if (gitPushAttempted && gitPushSucceeded) {
-                        response.setMessage("Proje oluşturuldu ve GitLab'e push edildi, ancak Kong kaydı başarısız.");
-                    } else if (gitPushAttempted && !gitPushSucceeded) {
-                        response.setMessage("Proje oluşturuldu, ancak GitLab push ve Kong kaydı başarısız.");
-                    } else { // Git push hiç denenmedi
-                        response.setMessage("Proje oluşturuldu, ancak Kong kaydı başarısız (GitLab push atlandı).");
-                    }
+            // --- 5. GitLab Push (İsteğe Bağlı - EN SONDA) ---
+            if (request.getGitlabRepoUrl() != null && !request.getGitlabRepoUrl().isBlank()) {
+                log.info("Adım 5: Proje GitLab deposuna push edilecek (tüm dosyalar)...");
+                try {
+                    gitLabService.initializeCommitAndPush(projectPath, request.getGitlabRepoUrl(), finalCommitMessage); // initializeCommitAndPush düzeltildi
+                    log.info("Adım 5 tamamlandı: Proje başarıyla GitLab'e push edildi.");
+                    response.setMessage("Proje başarıyla oluşturuldu ve GitLab'e push edildi."); // Genel başarı
+                } catch (Exception e) {
+                    log.error("Adım 5 başarısız: Proje GitLab'e push edilirken hata oluştu!", e);
+                    response.setMessage("Proje oluşturuldu, ancak GitLab'e push edilemedi: " + e.getMessage());
                 }
             } else {
-                // Eğer proje dosyaları hiç oluşturulamadıysa
-                response.setMessage("Proje dosyaları oluşturulamadığı için sonraki adımlar (GitLab/Kong) atlandı.");
+                log.info("Adım 5 atlandı: GitLab URL'si sağlanmadı.");
+                // Önceki adımlara göre mesaj ayarla, Git push atlandıysa
+                if (response.getMessage() == null) { // Eğer önceki adımlarda hata mesajı set edilmediyse
+                    response.setMessage("Proje başarıyla oluşturuldu (GitLab push atlandı).");
+                }
             }
+
+            // --- Nihai Mesaj Güncellemesi (Opsiyonel Hatalar İçin) ---
+            if (request.isRegisterOnKong() && (kongData == null || !"Success".equalsIgnoreCase(kongData.getResult()))) {
+                response.setMessage( (response.getMessage() != null ? response.getMessage() : "Proje oluşturuldu") + " (Kong kaydı başarısız)");
+            }
+            if (generatedDocFiles.isEmpty() && kongData != null && "Success".equalsIgnoreCase(kongData.getResult()) ) { // Kong başarılı ama doküman yoksa
+                response.setMessage( (response.getMessage() != null ? response.getMessage() : "Proje oluşturuldu") + " (Dokümantasyon oluşturulamadı)");
+            }
+
 
         } catch (IllegalArgumentException e) {
-            log.error("Geçersiz istek: {}", e.getMessage());
+            log.error("Ön koşul hatası: {}", e.getMessage());
             response.setMessage("İstek hatası: " + e.getMessage());
         } catch (IOException e) {
-            log.error("Dosya işlemi sırasında hata oluştu!", e);
-            response.setMessage("Dosya işlemi hatası: " + e.getMessage());
+            log.error("Kritik dosya işlemi hatası!", e);
+            response.setMessage("Kritik dosya hatası: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Proje oluşturma sırasında kritik bir hata oluştu!", e);
-            response.setMessage("Proje oluşturulurken hata oluştu: " + e.getMessage());
+            log.error("Proje oluşturma sürecinde kritik bir hata oluştu!", e);
+            response.setMessage("Proje oluşturulurken kritik hata: " + e.getMessage());
         }
         return response;
     }

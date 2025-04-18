@@ -22,7 +22,7 @@ public class RestProjectRequest  {
     private String systemName;
     private Boolean sslCerIsRequired;
     private String gitlabRepoUrl;
-
+    private boolean registerOnKong = true;
 
     public void generatePackageName() {
         try {

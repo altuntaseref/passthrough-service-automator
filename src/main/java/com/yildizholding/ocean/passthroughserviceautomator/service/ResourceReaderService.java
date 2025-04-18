@@ -12,7 +12,6 @@ import org.springframework.util.FileCopyUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -25,21 +24,25 @@ public class ResourceReaderService {
     private static final String CONTROLLER_TYPE = "controller";
     private static final String SERVICE_TYPE = "service";
 
-    /**
-     * Aşama 1'de oluşturulan Controller veya Service şablon dosyasının içeriğini okur.
-     */
     public Optional<String> readGeneratedTemplateContent(RestProjectRequest request, String type) {
         String className = null;
         Path filePath = null;
         try {
-            String systemNameCapitalized = FileUtils.capitalizeFirstLetter(request.getSystemName());
+            // systemName null veya boşsa hata ver
+            if (request.getSystemName() == null || request.getSystemName().isBlank()) {
+                log.error("SystemName eksik, şablon dosya adı oluşturulamıyor.");
+                return Optional.empty();
+            }
+            String systemNameCapitalized = FileUtils.capitalizeFirstLetter(request.getSystemName()); // FileUtils varsayılıyor
             className = systemNameCapitalized + (type.equals(CONTROLLER_TYPE) ? "Controller" : "Service");
             String subPackage = type;
             String mainSrcPath = request.generateProjectSrcMain();
-            if (mainSrcPath == null) {
-                log.error("'generateProjectSrcMain()' null döndü.");
+            // Gerekli path'lerin null olmadığını kontrol et
+            if (mainSrcPath == null || request.getPackageName() == null) {
+                log.error("Proje ana kaynak yolu veya paket adı null. Şablon yolu oluşturulamıyor.");
                 return Optional.empty();
             }
+
             filePath = Paths.get(mainSrcPath, "java",
                     request.getPackageName().replace('.', File.separatorChar),
                     subPackage, className + ".java");
@@ -57,12 +60,9 @@ public class ResourceReaderService {
         }
     }
 
-    /**
-     * Classpath'teki bir resource dosyasının içeriğini okur.
-     */
     public String readClasspathResourceFileContent(String resourcePath) throws IOException {
         log.debug("Classpath resource okunuyor: classpath:{}", resourcePath);
-        Resource resource = new ClassPathResource(resourcePath);
+        Resource resource = new ClassPathResource(resourcePath); // Başında / OLMAMALI
         if (!resource.exists()) {
             log.error("Classpath resource bulunamadı: classpath:{}", resourcePath);
             throw new FileNotFoundException("Resource not found in classpath: " + resourcePath);
