@@ -28,7 +28,7 @@ import java.io.IOException;
 public class GitLabService {
 
     // GitLab PAT'ını application.properties'ten güvenli bir şekilde oku
-    @Value("${gitlab.pat}")
+    @Value("${GITLAB_PAT}")
     private String gitlabToken;
 
     // GitLab PAT ile HTTPS klonlama/pushlama yaparken kullanıcı adı genellikle önemsizdir
