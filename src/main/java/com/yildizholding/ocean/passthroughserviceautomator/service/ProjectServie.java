@@ -4,6 +4,7 @@ import com.yildizholding.ocean.passthroughserviceautomator.builder.ProjectDirect
 import com.yildizholding.ocean.passthroughserviceautomator.builder.RestProjectBuilderImpl;
 import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectResponse;
 import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
+import com.yildizholding.ocean.passthroughserviceautomator.model.kong.OceanServiceRegisterResponseModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -27,6 +28,7 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
     private final CodeEnhancementService codeEnhancementService;
     private final GeneratedCodeWriterService codeWriterService;
     private final GitLabService gitLabService; // GitLab servisi inject edildi
+    private final KongIntegrationService kongIntegrationService; // Kong entegrasyon servisi inject edildi
 
 
     /**
@@ -35,6 +37,10 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
     public ProjectResponse generateProject(RestProjectRequest request, MultipartFile postmanFile) {
         ProjectResponse response = new ProjectResponse();
         String projectPath = request.generateProjectPath();
+
+        boolean gitPushAttempted = false; // Git push denendi mi?
+        boolean gitPushSucceeded = false; // Git push başarılı mı?
+
         boolean projectFilesGenerated = false;
         if (projectPath == null) {
             response.setMessage("Proje yolu oluşturulamadı.");
@@ -76,6 +82,7 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
                 log.info("Aşama 3: Proje GitLab deposuna push edilecek...");
                 try {
                     gitLabService.pushProjectToGitLab(projectPath, request.getGitlabRepoUrl());
+                    gitPushSucceeded = true;
                     // Başarılı mesajını ayarla
                     if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
                         response.setMessage("Proje başarıyla oluşturuldu, LLM kodları entegre edildi ve GitLab'e push edildi.");
@@ -84,6 +91,7 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
                     }
                     log.info("Aşama 3 tamamlandı: Proje GitLab'e başarıyla push edildi.");
                 } catch (GitAPIException | IOException | IllegalArgumentException e) {
+                    gitPushSucceeded = false;
                     log.error("Proje GitLab'e push edilirken hata oluştu!", e);
                     // Hata mesajını ayarla ama işlem başarılı kabul edilebilir (yerelde oluşturuldu)
                     if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
@@ -103,6 +111,36 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
             } else {
                 // Eğer proje dosyaları hiç oluşturulamadıysa (Aşama 1 veya 2'de hata)
                 response.setMessage("Proje dosyaları oluşturulamadığı için GitLab'e pushlanamadı.");
+            }
+
+            // --- Aşama 4: Kong'a Kaydet (Eğer proje oluşturulduysa) ---
+            if (projectFilesGenerated) {
+                log.info("Aşama 4: Servis Kong API Gateway'e kaydedilecek...");
+                OceanServiceRegisterResponseModel kongResponse = kongIntegrationService.registerServiceOnKong(request);
+
+                // --- Nihai Yanıt Mesajını Oluştur ---
+                if (kongResponse != null && "Success".equalsIgnoreCase(kongResponse.getResult())) {
+                    log.info("Aşama 4 tamamlandı: Kong kaydı başarılı.");
+                    if (gitPushAttempted && gitPushSucceeded) {
+                        response.setMessage("Proje oluşturuldu, GitLab'e push edildi ve Kong'a kaydedildi.");
+                    } else if (gitPushAttempted && !gitPushSucceeded) {
+                        response.setMessage("Proje oluşturuldu, Kong'a kaydedildi ancak GitLab'e push edilemedi.");
+                    } else { // Git push hiç denenmedi
+                        response.setMessage("Proje oluşturuldu ve Kong'a kaydedildi (GitLab push atlandı).");
+                    }
+                } else { // Kong kaydı başarısız
+                    log.error("Kong servis kaydı başarısız oldu.");
+                    if (gitPushAttempted && gitPushSucceeded) {
+                        response.setMessage("Proje oluşturuldu ve GitLab'e push edildi, ancak Kong kaydı başarısız.");
+                    } else if (gitPushAttempted && !gitPushSucceeded) {
+                        response.setMessage("Proje oluşturuldu, ancak GitLab push ve Kong kaydı başarısız.");
+                    } else { // Git push hiç denenmedi
+                        response.setMessage("Proje oluşturuldu, ancak Kong kaydı başarısız (GitLab push atlandı).");
+                    }
+                }
+            } else {
+                // Eğer proje dosyaları hiç oluşturulamadıysa
+                response.setMessage("Proje dosyaları oluşturulamadığı için sonraki adımlar (GitLab/Kong) atlandı.");
             }
 
         } catch (IllegalArgumentException e) {
