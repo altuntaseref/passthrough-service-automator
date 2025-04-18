@@ -98,7 +98,12 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>6.7.0.202309050840-r</version>
+        </dependency>
         <!-- Unirest -->
         <dependency>
             <groupId>com.konghq</groupId>

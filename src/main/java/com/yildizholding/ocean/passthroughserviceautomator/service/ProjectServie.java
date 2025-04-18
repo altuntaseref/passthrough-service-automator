@@ -6,6 +6,7 @@ import com.yildizholding.ocean.passthroughserviceautomator.model.ProjectResponse
 import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +26,8 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
     private final ProjectDirector projectDirector;
     private final CodeEnhancementService codeEnhancementService;
     private final GeneratedCodeWriterService codeWriterService;
+    private final GitLabService gitLabService; // GitLab servisi inject edildi
+
 
     /**
      * Yeni bir REST projesi oluşturur.
@@ -32,6 +35,7 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
     public ProjectResponse generateProject(RestProjectRequest request, MultipartFile postmanFile) {
         ProjectResponse response = new ProjectResponse();
         String projectPath = request.generateProjectPath();
+        boolean projectFilesGenerated = false;
         if (projectPath == null) {
             response.setMessage("Proje yolu oluşturulamadı.");
             log.error("Proje yolu null döndü.");
@@ -60,10 +64,45 @@ public class ProjectServie { // Sınıf adını ProjectService olarak değiştir
             if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
                 codeWriterService.writeCodeFiles(aiGeneratedCodeMapOpt.get(), request);
                 response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi.");
+                projectFilesGenerated = true;
                 log.info("Aşama 2 tamamlandı.");
             } else {
                 response.setMessage("Proje iskeleti oluşturuldu, ancak LLM kodları alınamadı/boş. Şablonlar kullanılıyor.");
+                projectFilesGenerated = true;
                 log.warn("Aşama 2 tamamlanamadı veya LLM yanıtı boş.");
+            }
+            // Sadece proje dosyaları başarıyla oluşturulduysa ve GitLab URL'si varsa push et
+            if (projectFilesGenerated && request.getGitlabRepoUrl() != null && !request.getGitlabRepoUrl().isBlank()) {
+                log.info("Aşama 3: Proje GitLab deposuna push edilecek...");
+                try {
+                    gitLabService.pushProjectToGitLab(projectPath, request.getGitlabRepoUrl());
+                    // Başarılı mesajını ayarla
+                    if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
+                        response.setMessage("Proje başarıyla oluşturuldu, LLM kodları entegre edildi ve GitLab'e push edildi.");
+                    } else {
+                        response.setMessage("Proje iskeleti başarıyla oluşturuldu ve GitLab'e push edildi (LLM kodu olmadan).");
+                    }
+                    log.info("Aşama 3 tamamlandı: Proje GitLab'e başarıyla push edildi.");
+                } catch (GitAPIException | IOException | IllegalArgumentException e) {
+                    log.error("Proje GitLab'e push edilirken hata oluştu!", e);
+                    // Hata mesajını ayarla ama işlem başarılı kabul edilebilir (yerelde oluşturuldu)
+                    if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
+                        response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi, ancak GitLab'e pushlanamadı: " + e.getMessage());
+                    } else {
+                        response.setMessage("Proje iskeleti başarıyla oluşturuldu, ancak GitLab'e pushlanamadı: " + e.getMessage());
+                    }
+                }
+            } else if (projectFilesGenerated) {
+                // GitLab URL yoksa bilgilendirme mesajı
+                log.info("GitLab URL'si sağlanmadığı için GitLab'e pushlama atlandı.");
+                if (aiGeneratedCodeMapOpt.isPresent() && !aiGeneratedCodeMapOpt.get().isEmpty()) {
+                    response.setMessage("Proje başarıyla oluşturuldu ve LLM kodları entegre edildi (GitLab push atlandı).");
+                } else {
+                    response.setMessage("Proje iskeleti başarıyla oluşturuldu (GitLab push atlandı).");
+                }
+            } else {
+                // Eğer proje dosyaları hiç oluşturulamadıysa (Aşama 1 veya 2'de hata)
+                response.setMessage("Proje dosyaları oluşturulamadığı için GitLab'e pushlanamadı.");
             }
 
         } catch (IllegalArgumentException e) {

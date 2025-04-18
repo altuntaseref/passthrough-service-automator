@@ -24,7 +24,7 @@ public class PromptGenerationService {
     private final ResourceReaderService resourceReaderService; // Yeni okuyucu servis
 
     // Sabitler
-    private static final String LLM_PROMPT_TEMPLATE_PATH = "templates/prompts/llm_code_generation_prompt.ftl";
+    private static final String LLM_PROMPT_TEMPLATE_PATH = "src/main/resources/templates/prompts/llm_code_generation_prompt.ftl";
     private static final String REFERENCE_CONTROLLER_PATH = "templates/reference/ReferenceController.txt";
     private static final String REFERENCE_SERVICE_PATH = "templates/reference/ReferenceService.txt";
     private static final String GENERATED_PROMPTS_DIR = "target/generated-prompts";
