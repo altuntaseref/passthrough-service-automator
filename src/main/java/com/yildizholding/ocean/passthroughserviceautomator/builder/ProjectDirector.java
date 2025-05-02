@@ -17,6 +17,10 @@ public class ProjectDirector {
         builder.createSettingsXml(restProjectRequest);
         builder.createSwaggerConfig(restProjectRequest);
         builder.createLogbackXml(restProjectRequest);
+        builder.addDeploymentYaml(restProjectRequest);
+        builder.addServiceYaml(restProjectRequest);
+        builder.addDockerfile(restProjectRequest);
+        builder.addJenkinsfile(restProjectRequest);
         builder.addConfigClasses(restProjectRequest);
         builder.generateService(restProjectRequest);
         builder.generateController(restProjectRequest);

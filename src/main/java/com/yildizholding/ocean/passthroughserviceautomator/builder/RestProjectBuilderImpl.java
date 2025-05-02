@@ -82,6 +82,26 @@ public class RestProjectBuilderImpl implements RestProjectBuilder {
         // Gerekirse ekleyebilirsiniz
     }
 
+    @Override
+    public void addDeploymentYaml(RestProjectRequest request) {
+        configGenerator.createDeploymentYaml(request);
+    }
+
+    @Override
+    public void addServiceYaml(RestProjectRequest request) {
+        configGenerator.createServiceYaml(request);
+    }
+
+    @Override
+    public void addDockerfile(RestProjectRequest request) {
+        configGenerator.createDockerfile(request);
+    }
+
+    @Override
+    public void addJenkinsfile(RestProjectRequest request) {
+        configGenerator.createJenkinsfile(request);
+    }
+
 //    @Override
 //    public void generateModelClasses(RestProjectRequest request) {
 //        modelGenerator.generateModelClasses(request);

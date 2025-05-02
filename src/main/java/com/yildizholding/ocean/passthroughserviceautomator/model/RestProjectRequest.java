@@ -62,6 +62,17 @@ public class RestProjectRequest  {
             return null;
         }
     }
+
+    public String generateProjectSource() {
+        try {
+            String outputPath = ProjectConfig.getInstance().getOutputPath();
+            String projectPath = outputPath + "\\" + projectName + "\\";
+            return projectPath;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     /**
      * Projenin src/test dizininin yolunu oluşturur.
      * Örn: C:\path\to\projects\my-project\src\test\

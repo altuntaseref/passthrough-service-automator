@@ -34,15 +34,19 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+<#--        <dependency>-->
+<#--            <groupId>org.springframework.boot</groupId>-->
+<#--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+<#--        </dependency>-->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.4</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -91,11 +95,11 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.yildizholding.ocean</groupId>
-            <artifactId>ocean-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+<#--        <dependency>-->
+<#--            <groupId>com.yildizholding.ocean</groupId>-->
+<#--            <artifactId>ocean-common</artifactId>-->
+<#--            <version>1.0-SNAPSHOT</version>-->
+<#--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -108,10 +112,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
+<#--        <dependency>-->
+<#--            <groupId>org.springframework.boot</groupId>-->
+<#--            <artifactId>spring-boot-starter-webflux</artifactId>-->
+<#--        </dependency>-->
     </dependencies>
     <build>
         <plugins>

@@ -18,6 +18,10 @@ public interface ProjectBuilder {
     void createLogbackXml(RestProjectRequest request);
     void createSettingsXml(RestProjectRequest request);
     void addConfigClasses(RestProjectRequest request);
+    void addDeploymentYaml(RestProjectRequest request);
+    void addServiceYaml(RestProjectRequest request);
+    void addDockerfile(RestProjectRequest request);
+    void addJenkinsfile(RestProjectRequest request);
 
 
 

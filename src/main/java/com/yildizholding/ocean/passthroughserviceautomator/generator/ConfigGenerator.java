@@ -88,7 +88,72 @@ public class ConfigGenerator {
             log.error("Application properties oluşturulurken hata oluştu", e);
         }
     }
+    public void createJenkinsfile(RestProjectRequest request) {
+        try {
+            String module = request.generateProjectSource();
+            String fileName = String.format("%s\\Jenkinsfile", module);
+            String templateFile = "src/main/resources/templates/rest/jenkins-file.ftl";
 
+            HashMap<String, Object> args = new HashMap<>();
+            args.put("projectName", request.getProjectName());
+            args.put("dockerImageName", "${env.DOCKER_IMAGE_NAME}");
+            args.put("buildNumber", "${env.BUILD_NUMBER}");
+            args.put("kubernetesDeployment", "${env.KUBERNETES_DEPLOYMENT}");
+            args.put("kubernetesNamespace", "${env.KUBERNETES_NAMESPACE}");
+
+
+            templateGenerator.generateFromTemplate(templateFile, fileName, args);
+        } catch (Exception e) {
+            log.error("Jenkinsfile oluşturulurken hata oluştu", e);
+        }
+    }
+
+    public void createDeploymentYaml(RestProjectRequest request) {
+        try {
+            String module = request.generateProjectSource();
+            String fileName = String.format("%s\\deployment.yaml", module);
+            String templateFile = String.format("src/main/resources/templates/rest/%s-deployment-yaml.ftl", request.getProjectName());
+
+            HashMap<String, Object> args = new HashMap<>();
+            args.put("projectName", request.getProjectName());
+
+
+            templateGenerator.generateFromTemplate(templateFile, fileName, args);
+        } catch (Exception e) {
+            log.error("Deployment.yaml oluşturulurken hata oluştu", e);
+        }
+    }
+
+    public void createServiceYaml(RestProjectRequest request) {
+        try {
+            String module = request.generateProjectSource();
+            String fileName = String.format("%s\\service.yaml", module);
+            String templateFile = String.format("src/main/resources/templates/rest/%s-service-yaml.ftl", request.getProjectName());
+
+            HashMap<String, Object> args = new HashMap<>();
+            args.put("projectName", request.getProjectName());
+
+
+            templateGenerator.generateFromTemplate(templateFile, fileName, args);
+        } catch (Exception e) {
+            log.error("Service.yaml oluşturulurken hata oluştu", e);
+        }
+    }
+
+
+
+    public void createDockerfile(RestProjectRequest request) {
+        try {
+            String module = request.generateProjectSource();
+            String fileName = String.format("%s\\Dockerfile", module);
+            String templateFile = "src/main/resources/templates/rest/dockerfile.ftl";
+            HashMap<String, Object> args = new HashMap<>();
+
+            templateGenerator.generateFromTemplate(templateFile, fileName, args);
+        } catch (Exception e) {
+            log.error("Dockerfile oluşturulurken hata oluştu", e);
+        }
+    }
     public void createBootStrap(RestProjectRequest request) {
         try {
             String module = request.generateProjectSrcMain() + "resources";
