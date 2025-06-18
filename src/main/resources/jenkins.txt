@@ -1,0 +1,144 @@
+    tools {
+        maven 'MAVEN'
+        jdk 'JDK-17'
+    }
+
+    stages {
+        // 1. Aşama: Base Image'ı Çekin
+        stage('Pull Base Image') {
+            steps {
+                echo "Temel Docker image çekiliyor..."
+                script {
+                    sh "docker pull ${BASE_IMAGE_NAME}:latest || true"
+                }
+            }
+        }
+
+        // 2. Aşama: Uygulamayı Derleme ve Paketleme
+        stage('Build') {
+            steps {
+                echo "Maven ile uygulama derleniyor ve paketleniyor..."
+                // Maven yerel önbelleğini koruyarak daha hızlı build
+                bat "mvn clean package -DskipTests -Dmaven.repo.local=.m2/repository"
+            }
+        }
+
+        // 3. Aşama: Docker İmajı Oluşturma
+        stage('Build Docker Image') {
+            steps {
+                echo "Docker imajı oluşturuluyor..."
+                script {
+                    // BuildKit'i etkinleştir
+                    withEnv(['DOCKER_BUILDKIT=1']) {
+                        // Docker build için önbellek kullanımını optimize et
+                        def buildArgs = "--build-arg BUILDKIT_INLINE_CACHE=1"
+                        buildArgs += " --cache-from ${BASE_IMAGE_NAME}:latest"
+
+                        def dockerImage = docker.build(
+                            "${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}",
+                            "${buildArgs} ."
+                        )
+                    }
+                }
+            }
+        }
+
+        // 4. Aşama: Docker İmajını Yükleme (Push)
+        stage('Push Docker Image') {
+            steps {
+                echo "Docker imajı Docker Hub'a yükleniyor..."
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS_ID) {
+                        docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push()
+                        docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push('latest')
+                    }
+                }
+            }
+        }
+
+        // 5. Aşama: Kubernetes Manifest Dosyalarını Uygulama
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo "Uygulama Kubernetes'e dağıtılıyor..."
+
+                // kubeconfig dosyasını kullanarak kubectl komutlarını çalıştır
+                withCredentials([file(credentialsId: 'kubeconfig-dockerdesktop', variable: 'KUBECONFIG_FILE')]) {
+                    script {
+                        // Önce YAML dosyalarını oluştur (her build için güncel Docker image'ı ile)
+                        writeFile file: 'deployment.yaml', text: """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${KUBERNETES_DEPLOYMENT}
+  namespace: ${KUBERNETES_NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${PROJECT_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${PROJECT_NAME}
+    spec:
+      containers:
+      - name: spring-boot-container
+        image: ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "dev"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+"""
+
+                        writeFile file: 'service.yaml', text: """
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${PROJECT_NAME}-service
+  namespace: ${KUBERNETES_NAMESPACE}
+spec:
+  selector:
+    app: ${PROJECT_NAME}
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+"""
+
+                        // Kubernetes YAML dosyalarını uygula
+                        bat """
+                        set KUBECONFIG=%KUBECONFIG_FILE%
+                        kubectl apply -f deployment.yaml -n ${KUBERNETES_NAMESPACE}
+                        kubectl apply -f service.yaml -n ${KUBERNETES_NAMESPACE}
+                        kubectl rollout status deployment/${KUBERNETES_DEPLOYMENT} -n ${KUBERNETES_NAMESPACE}
+                        set KUBECONFIG=
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    // Pipeline bittikten sonra yapılacaklar
+    post {
+        always {
+            echo 'Pipeline tamamlandı.'
+            // Çalışma alanını temizle ama .m2 klasörünü koru
+            cleanWs(deleteDirs: true, patterns: [[pattern: '.m2/', type: 'EXCLUDE']])
+        }
+        success {
+            echo 'Pipeline başarıyla tamamlandı!'
+        }
+        failure {
+            echo 'Pipeline başarısız oldu!'
+        }
+    }
+}

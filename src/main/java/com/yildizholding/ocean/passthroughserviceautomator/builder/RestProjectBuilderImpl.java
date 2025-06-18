@@ -44,6 +44,7 @@ public class RestProjectBuilderImpl implements RestProjectBuilder {
 
     @Override
     public void createInboundRequestLoggingFilterConfig(RestProjectRequest request) {
+        configGenerator.createRequestLoggingConfiguration(request);
         configGenerator.createInboundRequestLoggingFilterConfig(request);
     }
 
@@ -84,12 +85,12 @@ public class RestProjectBuilderImpl implements RestProjectBuilder {
 
     @Override
     public void addDeploymentYaml(RestProjectRequest request) {
-        configGenerator.createDeploymentYaml(request);
+//        configGenerator.createDeploymentYaml(request);
     }
 
     @Override
     public void addServiceYaml(RestProjectRequest request) {
-        configGenerator.createServiceYaml(request);
+//        configGenerator.createServiceYaml(request);
     }
 
     @Override

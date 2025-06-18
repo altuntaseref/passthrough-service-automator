@@ -3,6 +3,7 @@ package com.yildizholding.ocean.passthroughserviceautomator.generator;
 import com.yildizholding.ocean.passthroughserviceautomator.config.ProjectConfig;
 import com.yildizholding.ocean.passthroughserviceautomator.model.RestProjectRequest;
 import com.yildizholding.ocean.passthroughserviceautomator.util.FileUtils;
+import com.yildizholding.ocean.passthroughserviceautomator.util.ResourceReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ConfigGenerator {
 
             HashMap<String, Object> args = new HashMap<>();
             args.put("projectName", module);
+            args.put("jupiterVersion", "${junit-jupiter.version}");
 
             templateGenerator.generateFromTemplate(templateFile, fileName, args);
         } catch (Exception e) {
@@ -50,6 +52,22 @@ public class ConfigGenerator {
         }
     }
 
+    public void createRequestLoggingConfiguration(RestProjectRequest request) {
+        try {
+            String packagePath = request.getPackageName().replace(".", File.separator);
+            String module = request.generateProjectSrcMain() + "java\\" + packagePath + "\\config";
+            String fileName = String.format("%s\\RequestLoggingConfiguration.java", module);
+            String templateFile = "src/main/resources/templates/rest/RequestLoggingConfiguration.ftl";
+
+            HashMap<String, Object> args = new HashMap<>();
+            args.put("packageName", request.getPackageName());
+
+            templateGenerator.generateFromTemplate(templateFile, fileName, args);
+        } catch (Exception e) {
+            log.error("ERROR for create RequestLoggingConfiguration...", e);
+        }
+    }
+
     public void createServiceConfig(RestProjectRequest request) {
         try {
             String packagePath = request.getPackageName().replace(".", File.separator);
@@ -68,6 +86,8 @@ public class ConfigGenerator {
             log.error("ERROR for create ServiceConfig...", e);
         }
     }
+
+
 
     public void createApplicationProperties(RestProjectRequest request) {
         try {
@@ -96,10 +116,13 @@ public class ConfigGenerator {
 
             HashMap<String, Object> args = new HashMap<>();
             args.put("projectName", request.getProjectName());
+            args.put("jenkistxt", ResourceReader.readResourceAsString("jenkins.txt"));
             args.put("dockerImageName", "${env.DOCKER_IMAGE_NAME}");
             args.put("buildNumber", "${env.BUILD_NUMBER}");
             args.put("kubernetesDeployment", "${env.KUBERNETES_DEPLOYMENT}");
             args.put("kubernetesNamespace", "${env.KUBERNETES_NAMESPACE}");
+            args.put("baseImageName", "${BASE_IMAGE_NAME}");
+            args.put("dockerBuildArgs", "${dockerBuildArgs}");
 
 
             templateGenerator.generateFromTemplate(templateFile, fileName, args);
@@ -148,7 +171,6 @@ public class ConfigGenerator {
             String fileName = String.format("%s\\Dockerfile", module);
             String templateFile = "src/main/resources/templates/rest/dockerfile.ftl";
             HashMap<String, Object> args = new HashMap<>();
-
             templateGenerator.generateFromTemplate(templateFile, fileName, args);
         } catch (Exception e) {
             log.error("Dockerfile oluşturulurken hata oluştu", e);

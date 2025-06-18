@@ -23,6 +23,7 @@
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <!-- Update Spring Boot Admin version -->
         <spring-boot-admin.version>2.1.5</spring-boot-admin.version>
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
     </properties>
     <dependencies>
         <dependency>
@@ -34,10 +35,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-<#--        <dependency>-->
-<#--            <groupId>org.springframework.boot</groupId>-->
-<#--            <artifactId>spring-boot-starter-webflux</artifactId>-->
-<#--        </dependency>-->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
@@ -60,21 +57,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web-services</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-ri</artifactId>
             <version>2.3.3</version>
             <type>pom</type>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.6.2</version>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -95,27 +83,30 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-<#--        <dependency>-->
-<#--            <groupId>com.yildizholding.ocean</groupId>-->
-<#--            <artifactId>ocean-common</artifactId>-->
-<#--            <version>1.0-SNAPSHOT</version>-->
-<#--        </dependency>-->
+
+        <!-- JUnit Jupiter bağımlılıkları -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${jupiterVersion}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit Jupiter Engine ekliyoruz - bu önemli -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${jupiterVersion}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-<#--        <dependency>-->
-<#--            <groupId>org.springframework.boot</groupId>-->
-<#--            <artifactId>spring-boot-starter-webflux</artifactId>-->
-<#--        </dependency>-->
     </dependencies>
     <build>
         <plugins>
@@ -129,6 +120,11 @@
                 <configuration>
                     <failOnNoGitDirectory>false</failOnNoGitDirectory>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
             </plugin>
         </plugins>
     </build>
