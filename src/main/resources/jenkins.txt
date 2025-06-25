@@ -110,7 +110,7 @@ spec:
   ports:
   - port: 80
     targetPort: 8080
-  type: ClusterIP
+  type: NodePort
 """
 
                         // Kubernetes YAML dosyalarını uygula
